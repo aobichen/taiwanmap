@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="//d3js.org/topojson.v1.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+</head>
+<style>
+    body {
+        background-color: #fff;
+        /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#398fd6+5,7db9e8+76 */
+        background: #398fd6;
+        /* Old browsers */
+        background: -moz-linear-gradient(-45deg, #398fd6 5%, #7db9e8 76%);
+        /* FF3.6-15 */
+        background: -webkit-linear-gradient(-45deg, #398fd6 5%, #7db9e8 76%);
+        /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(135deg, #398fd6 5%, #7db9e8 76%);
+        /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#398fd6', endColorstr='#7db9e8', GradientType=1);
+        /* IE6-9 fallback on horizontal gradient */
+    }
+    
+    .subunit-boundary {
+        fill: none;
+        stroke: #FFD306;
+        stroke-dasharray: 5, 0;
+        stroke-linejoin: round;
+    }
+</style>
+
+<body></body>
+<script>
+    jQuery(function() {
+        var width = 800,
+            height = 600;
+
+        var svg = d3.select("body").append("svg")
+            // .attr("class", "svgback")
+            .attr("width", width)
+            .attr("height", height);
+
+        var projection = d3.geo.mercator()
+            .center([121, 24])
+            .scale(6000);
+
+        var path = d3.geo.path()
+            .projection(projection);
+
+        d3.json("taiwan.json", function(error, topology) {
+            console.log(topology);
+            var g = svg.append("g");
+
+            // 縣市/行政區界線
+            d3.select("svg").append("path").datum(
+                topojson.mesh(topology,
+                    topology.objects["County_MOI_1060525"],
+                    function(a,
+                        b) {
+                        return a !== b;
+                    })).attr("d", path).attr("class", "subunit-boundary");
+
+            d3.select("g").selectAll("path")
+                .data(topojson.feature(topology, topology.objects.County_MOI_1060525).features)
+                .enter()
+                .append("path")
+                .attr("d", path)
+                .attr({
+                    d: path,
+                    name: function(d) {
+                        return d.properties["COUNTYNAME"];
+                    },
+                    fill: '#fff',
+                    stroke: "#FFD306"
+
+                }).attr('stroke-width', "2")
+                .on("mouseover", function(d) {
+                    d3.select(this).attr("fill", "#FFDC35");
+
+                }).on("mouseleave", function(d) {
+                    d3.select(this).attr("fill", "#fff");
+                });
+        });
+    })
+</script>
+
+</html>
